@@ -3,8 +3,7 @@ services:
   database:
     build: .
     container_name: postgres
-    image: harbor.oom.ag/library/postgres_with_wal-g:12.8
-    restart: always
+    image: harbor.oom.ag/library/postgres_with_wal-g_rec:12.8
     volumes:
       - /var/lib/postgresql/data:/var/lib/postgresql/data
     environment:
@@ -18,10 +17,12 @@ services:
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
       PGUSER: ${POSTGRES_USER}
       PGPASSWORD: ${POSTGRES_PASSWORD}
+      PGDATABASE: ${POSTGRES_DB}
       PGHOST: ${PGHOST}
       PGDATA: ${PGDATA}
       WALG_COMPRESSION_METHOD: ${WALG_COMPRESSION_METHOD}
       WALG_DELTA_MAX_STEPS: ${WALG_DELTA_MAX_STEPS}
       WALG_S3_PREFIX: ${WALG_S3_PREFIX}
+      RECOVERY_WALG: ${RECOVERY_WALG}
     ports:
     - "127.0.0.1:5432:5432"
