@@ -3,7 +3,7 @@ services:
   database:
     build: .
     container_name: postgres
-    image: harbor.oom.ag/library/postgres_with_wal-g_rec:12.8
+    image: harbor.oom.ag/library/postgres_with_wal-g:12.8
     volumes:
       - /var/lib/postgresql/data:/var/lib/postgresql/data
     environment:
