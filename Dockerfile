@@ -1,4 +1,5 @@
-FROM postgres:12.8
+ARG POSTGRES_VERSION=$POSTGRES_VERSION
+FROM postgres:${POSTGRES_VERSION}
 
 RUN apt update -y && \
     apt install -y wget && \

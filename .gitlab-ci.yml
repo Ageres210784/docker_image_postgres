@@ -1,0 +1,41 @@
+---
+stages:
+  - build_and_push
+services:
+  - docker:dind
+
+.common_build:
+  stage: build_and_push
+  before_script:
+    - docker-compose build
+    - docker images
+
+build_without_push:
+  stage: build_and_push
+  extends:
+    - .common_build
+  script:
+    - docker-compose up -d
+    - echo "Show local images"
+    - docker ps -a
+    - docker exec -i postgres psql -l
+    - docker-compose down
+  except:
+    - master
+    - main
+
+build_and_push:
+  stage: build_and_push
+  extends:
+    - .common_build
+  script:
+    - docker-compose up -d
+    - echo "Show local images"
+    - docker ps -a
+    - docker exec -i postgres psql -l
+    - docker-compose down
+    - echo "$DOCKER_REGISTRY_PASSWORD" | docker login -u "$DOCKER_REGISTRY_LOGIN" --password-stdin "$DOCKER_REGISTRY_URL"
+    - docker-compose push
+  only:
+    - master
+    - main
