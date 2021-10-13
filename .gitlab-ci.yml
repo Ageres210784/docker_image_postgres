@@ -17,7 +17,7 @@ build_without_push:
   script:
     - docker-compose up -d
     - echo "Show local images"
-    - delay 5
+    - sleep 5
     - docker ps -a
     - docker exec -i postgres psql -l
     - docker-compose down
