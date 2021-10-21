@@ -17,10 +17,10 @@ For example see the `docker-compose.yml.example` and `.env.example`
 - for periodic archiving, you need to configure the cron with the following task:
 
 ```bash
-0 2 * * * /usr/local/bin/wal-g backup-push /var/lib/postgresql/12/main >> /var/log/postgresql/walg_backup.log 2>&1
+0 2 * * * /usr/bin/docker exec -i postgres wal-g backup-push /var/lib/postgresql/12/main >> /var/log/postgresql/walg_backup.log 2>&1
 ````
 - to clean up archives:
 
 ```bash
-0 1 * * * /usr/local/bin/wal-g delete before FIND_FULL $(date -d '-1 days' '+\%FT\%TZ') --confirm >> /var/log/postgresql/walg_delete.log 2>&1
+0 1 * * * /usr/bin/docker exec -i postgres wal-g delete before FIND_FULL $(date -d '-1 days' '+\%FT\%TZ') --confirm >> /var/log/postgresql/walg_delete.log 2>&1
 ```
