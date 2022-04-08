@@ -2,7 +2,8 @@ ARG POSTGRES_VERSION=$POSTGRES_VERSION
 FROM postgres:${POSTGRES_VERSION}
 
 RUN apt update -y && \
-    apt install -y wget && \
+    apt install -y wget python3-pip && \
+    pip3 install --no-cache-dir apprise && \
     wget https://github.com/wal-g/wal-g/releases/download/v1.1/wal-g-pg-ubuntu-20.04-amd64 && \
     chmod +x wal-g-pg-ubuntu-20.04-amd64 && \
 	  mv wal-g-pg-ubuntu-20.04-amd64 /usr/bin/wal-g && \
@@ -10,7 +11,8 @@ RUN apt update -y && \
     chmod +x gomplate_linux-amd64 && \
 		mv gomplate_linux-amd64 /usr/bin/gomplate && \
 		mkdir -p /etc/postgresql/ && \
-    cp /usr/share/postgresql/postgresql.conf.sample /etc/postgresql/postgresql.conf.tmpl
+    cp /usr/share/postgresql/postgresql.conf.sample /etc/postgresql/postgresql.conf.tmpl && \
+    rm -rf /var/lib/apt/lists/*
 RUN sed -ri "s/^#recovery_target_action = 'pause'/recovery_target_action = {{.Env.RECOVERY_TARGET_ACTION}}/" /etc/postgresql/postgresql.conf.tmpl && \
     sed -ri "s/^#recovery_target_time = ''/recovery_target_time = {{.Env.RECOVERY_TARGET_TIME}}/" /etc/postgresql/postgresql.conf.tmpl && \
     sed -ri "s/^#recovery_target_timeline = 'latest'/recovery_target_timeline = {{.Env.RECOVERY_TARGET_TIMELINE}}/" /etc/postgresql/postgresql.conf.tmpl && \
@@ -18,6 +20,8 @@ RUN sed -ri "s/^#recovery_target_action = 'pause'/recovery_target_action = {{.En
     sed -ri "s/^#archive_timeout = 0/archive_timeout = {{.Env.ARCHIVE_TIMEOUT}}/" /etc/postgresql/postgresql.conf.tmpl && \
     sed -ri "s/^#archive_command = ''/archive_command = {{.Env.ARCHIVE_COMMAND}}/" /etc/postgresql/postgresql.conf.tmpl && \
     sed -ri "s/^#restore_command = ''/restore_command = {{.Env.RESTORE_COMMAND}}/" /etc/postgresql/postgresql.conf.tmpl
+COPY wal-g.sh /usr/local/bin/wal-g.sh
+RUN chmod u+x /usr/local/bin/wal-g.sh
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod u+x /docker-entrypoint.sh
 ENTRYPOINT ["/docker-entrypoint.sh"]
@@ -31,4 +35,5 @@ ENV RECOVERY_TARGET_TIME=\'\'
 ENV RECOVERY_TARGET_TIMELINE=\'current\'
 ENV RECOVERY_WALG=false
 ENV WALG_RESTORE_NAME=LATEST
+ENV APPRISE_TARGET=""
 CMD ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]
