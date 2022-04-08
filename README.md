@@ -24,3 +24,15 @@ For example see the `docker-compose.yml.example` and `.env.example`
 ```bash
 0 1 * * * /usr/bin/docker exec -i postgres wal-g delete before FIND_FULL $(date -d '-1 days' '+\%FT\%TZ') --confirm >> /var/log/postgresql/walg_delete.log 2>&1
 ```
+
+## Alerting
+
+If you need to send alerts when backup is failed, you should set the environment `APPRISE_TARGET`, and chenge `wal-g` to `wal-g.sh` in crontab jobs.
+
+Example:
+```bash
+APPRISE_TARGET="tgram://TOO:MANY/-NUMBERS"
+```
+```bash
+0 2 * * * /usr/bin/docker exec -i postgres wal-g.sh backup-push /var/lib/postgresql/12/main >> /var/log/postgresql/walg_backup.log 2>&1
+```
