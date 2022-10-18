@@ -2,7 +2,7 @@
 stages:
   - build_and_push
 services:
-  - docker:dind
+  - docker:18.09.7-dind
 
 .common_build:
   stage: build_and_push
