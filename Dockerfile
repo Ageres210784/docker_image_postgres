@@ -2,24 +2,25 @@ ARG POSTGRES_VERSION=$POSTGRES_VERSION
 FROM postgres:${POSTGRES_VERSION}
 
 RUN apt update -y && \
-    apt install -y wget python3-pip && \
-    pip3 install --no-cache-dir apprise && \
-    wget https://github.com/wal-g/wal-g/releases/download/v1.1/wal-g-pg-ubuntu-20.04-amd64 && \
-    chmod +x wal-g-pg-ubuntu-20.04-amd64 && \
-	  mv wal-g-pg-ubuntu-20.04-amd64 /usr/bin/wal-g && \
-    wget https://github.com/hairyhenderson/gomplate/releases/download/v3.10.0/gomplate_linux-amd64 && \
+    apt install -y wget apprise && \
+    wget https://github.com/wal-g/wal-g/releases/download/v3.0.7/wal-g-pg-ubuntu-24.04-amd64 && \
+    chmod +x /wal-g-pg-ubuntu-24.04-amd64 && \
+    mv /wal-g-pg-ubuntu-24.04-amd64 /usr/bin/wal-g && \
+    wget https://github.com/hairyhenderson/gomplate/releases/download/v4.3.3/gomplate_linux-amd64 && \
     chmod +x gomplate_linux-amd64 && \
-		mv gomplate_linux-amd64 /usr/bin/gomplate && \
-		mkdir -p /etc/postgresql/ && \
-    cp /usr/share/postgresql/postgresql.conf.sample /etc/postgresql/postgresql.conf.tmpl && \
+    mv gomplate_linux-amd64 /usr/bin/gomplate && \
     rm -rf /var/lib/apt/lists/*
-RUN sed -ri "s/^#recovery_target_action = 'pause'/recovery_target_action = {{.Env.RECOVERY_TARGET_ACTION}}/" /etc/postgresql/postgresql.conf.tmpl && \
+RUN mkdir -p /etc/postgresql/ && \
+    cp /usr/share/postgresql/postgresql.conf.sample /etc/postgresql/postgresql.conf.tmpl && \
+    sed -i "1i include_if_exists = '{{.Env.PGDATA}}/postgresql.conf'" /etc/postgresql/postgresql.conf.tmpl && \
+    sed -ri "s/^#recovery_target_action = 'pause'/recovery_target_action = {{.Env.RECOVERY_TARGET_ACTION}}/" /etc/postgresql/postgresql.conf.tmpl && \
     sed -ri "s/^#recovery_target_time = ''/recovery_target_time = {{.Env.RECOVERY_TARGET_TIME}}/" /etc/postgresql/postgresql.conf.tmpl && \
     sed -ri "s/^#recovery_target_timeline = 'latest'/recovery_target_timeline = {{.Env.RECOVERY_TARGET_TIMELINE}}/" /etc/postgresql/postgresql.conf.tmpl && \
     sed -ri "s/^#archive_mode = off/archive_mode = {{.Env.ARCHIVE_MODE}}/" /etc/postgresql/postgresql.conf.tmpl && \
     sed -ri "s/^#archive_timeout = 0/archive_timeout = {{.Env.ARCHIVE_TIMEOUT}}/" /etc/postgresql/postgresql.conf.tmpl && \
     sed -ri "s/^#archive_command = ''/archive_command = {{.Env.ARCHIVE_COMMAND}}/" /etc/postgresql/postgresql.conf.tmpl && \
-    sed -ri "s/^#restore_command = ''/restore_command = {{.Env.RESTORE_COMMAND}}/" /etc/postgresql/postgresql.conf.tmpl
+    sed -ri "s/^#restore_command = ''/restore_command = {{.Env.RESTORE_COMMAND}}/" /etc/postgresql/postgresql.conf.tmpl && \
+    sed -ri "s/^#include_if_exists = '...'/include_if_exists = '{{.Env.PGDATA}}\/postgresql.additional.conf'/" /etc/postgresql/postgresql.conf.tmpl
 COPY wal-g.sh /usr/local/bin/wal-g.sh
 RUN chmod u+x /usr/local/bin/wal-g.sh
 COPY docker-entrypoint.sh /docker-entrypoint.sh

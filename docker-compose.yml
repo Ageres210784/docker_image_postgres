@@ -1,5 +1,4 @@
 ---
-version: "3.6"
 services:
   database:
     build:
@@ -18,8 +17,9 @@ services:
       # ARCHIVE_MODE: ${ARCHIVE_MODE}
       # ARCHIVE_TIMEOUT: ${ARCHIVE_TIMEOUT}
       # AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-      # AWS_REGION: ${AWS_REGION}
       # AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      # AWS_ENDPOINT: ${AWS_ENDPOINT}
+      # AWS_REGION: ${AWS_REGION}
       # WALG_S3_PREFIX: ${WALG_S3_PREFIX}
       PGDATABASE: ${POSTGRES_DB}
       PGUSER: ${POSTGRES_USER}
